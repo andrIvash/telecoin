@@ -1,17 +1,26 @@
+<<<<<<< HEAD
 require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 const service = require("./services/index");
+=======
+import * as dotenv from 'dotenv';
+import * as TelegramBot from 'node-telegram-bot-api';
+// const TelegramBot = require('node-telegram-bot-api');
+dotenv.config();
+const bot = new TelegramBot(process.env.TG_KEY, { polling: true });
+>>>>>>> origin/main
 
 const bot = new TelegramBot(process.env.TG_KEY, {polling: true});
 let timeOutFunctionId;
 const initialKeyboard = [
     [
-      {
-        text: 'BTC',
-        callback_data: 'btc'
-      }
+        {
+            text: 'BTC',
+            callback_data: 'btc'
+        }
     ],
     [
+<<<<<<< HEAD
       {
         text: 'ETH',
         callback_data: 'eth'
@@ -39,6 +48,11 @@ const initialKeyboard = [
         {
           text: 'BUSD',
           callback_data: 'busd'
+=======
+        {
+            text: 'ETH',
+            callback_data: 'eth'
+>>>>>>> origin/main
         }
     ]
 ];
@@ -78,7 +92,7 @@ const formatResult = (data) => {
 };
 
 
-bot.on('message', (msg, ) => {
+bot.on('message', (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Hello, my friend!', {
         reply_markup: {
@@ -100,7 +114,7 @@ bot.on('callback_query', (query) => {
     if (query.data === 'btc') {
         currency = 'BTCUSDT';
     }
-  
+
     if (query.data === 'eth') {
         currency = 'ETHUSDT';
     }
