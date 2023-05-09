@@ -11,6 +11,9 @@ module.exports = {
         "react/jsx-props-no-spreading": 0,
         "react/jsx-curly-newline": 0,
         "react/style-prop-object": 0,
-        "indent": ["error", 4]
+        "indent": ["error", 4],
+        "import/extensions": [0, {"js": "always"  }]
+
+
     },
 }
