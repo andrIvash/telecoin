@@ -1,16 +1,16 @@
-const Binance = require('node-binance-api');
-const { SMA, RSI, VWAP, OBV } = require('technicalindicators');
+import Binance from 'node-binance-api';
+import { SMA, RSI, VWAP, OBV }  from 'technicalindicators';
 
-    // Initialize Binance API client
+// Initialize Binance API client
 const binance = new Binance().options({
     APIKEY: process.env.B_KEY,
     APISECRET: process.env.BS_KEY
 });
 
 const calculateSignals = (currency, timeframe, cb) => {
-    console.log("go: " + currency);
-    const symbol = currency ? currency : 'BTCUSDT'; //
-    const interval = timeframe ? timeframe : '15m';//'1h';
+    console.log(`go: ${  currency}`);
+    const symbol = currency || 'BTCUSDT'; //
+    const interval = timeframe || '15m';// '1h';
     const periods = {
         sma20: 20,
         sma50: 50,
@@ -23,9 +23,9 @@ const calculateSignals = (currency, timeframe, cb) => {
     const takeProfit = 0.03;
 
     // Fetch historical price data
-    binance.candlesticks(symbol, interval, (error, ticks, symbol) => {
+    binance.candlesticks(symbol, interval, (error, ticks, selectedSymbol) => {
         if (error) {
-            console.error(error, symbol);
+            console.error(error, selectedSymbol);
             return;
         }
 
@@ -56,49 +56,49 @@ const calculateSignals = (currency, timeframe, cb) => {
         const lastSma100 = sma100[sma100.length - 1];
 
         if (lastRsi > 50 && lastSma20 > lastSma50 && lastSma50 > lastSma100) {
-            //up
+            // up
             if (lastPrice > lastVwap && lastObv > 0) {
                 const stopLossLevel = lastPrice - (lastPrice * stopLoss);
                 const takeProfitLevel = lastPrice + (lastPrice * takeProfit);
                 const isReverse = lastPrice < lastSma20 || lastRsi < 50 || lastObv < 0 || lastPrice < lastVwap;
                 const result = {
                     current: lastPrice,
-                    currency: currency,
+                    currency,
                     shouldBuy: isReverse ? false :
                         lastPrice > lastVwap && lastObv > 0,
                     stopLossLevel,
                     takeProfitLevel,
                     reverse: isReverse
                 }
-                console.log(`${symbol} r-up: `, result);
+                console.log(`${selectedSymbol} r-up: `, result);
                 cb(result);
             }
 
         } else if (lastRsi < 50 && lastSma20 < lastSma50 && lastSma50 < lastSma100) {
-            //down
+            // down
             const stopLossLevel = lastPrice + (lastPrice * stopLoss);
             const takeProfitLevel = lastPrice - (lastPrice * takeProfit);
             const isReverse = lastPrice > lastSma20 || lastRsi > 50 || lastObv > 0 || lastPrice > lastVwap
             const result = {
                 current: lastPrice,
-                currency: currency,
+                currency,
                 shouldSell: isReverse ? false :
                     lastPrice < lastVwap && lastObv < 0,
                 stopLossLevel,
                 takeProfitLevel,
                 reverse: isReverse
             }
-            console.log(`${symbol} r-down: `, result);
+            console.log(`${selectedSymbol} r-down: `, result);
             cb(result);
         } else {
-            let last_tick = ticks[ticks.length - 1];
-	        let [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = last_tick;
+            const lastTick = ticks[ticks.length - 1];
+	        const [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = lastTick;
 	        console.log(`last close: ${close}`);
             cb({currency, close});
         }   
     });
 };
 
-module.exports = {
+export default {
     calculateSignals
 }

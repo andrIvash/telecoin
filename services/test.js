@@ -6,24 +6,24 @@ const { SMA, RSI, VWAP, OBV } = require('technicalindicators');
 const symbol = 'BTCUSDT';
 const interval = '1h';
 const periods = {
-  sma20: 20,
-  sma50: 50,
-  sma100: 100,
-  rsi: 14,
-  vwap: 60,
-  obv: null // this can be set dynamically based on the time interval
+    sma20: 20,
+    sma50: 50,
+    sma100: 100,
+    rsi: 14,
+    vwap: 60,
+    obv: null // this can be set dynamically based on the time interval
 };
 const stopLoss = 0.01;
 const takeProfit = 0.02;
 
 // Initialize Binance API client
 const binance = new Binance().options({
-  APIKEY: 'your_api_key',
-  APISECRET: 'your_api_secret'
+    APIKEY: 'your_api_key',
+    APISECRET: 'your_api_secret'
 });
 
 // Fetch historical price data
-binance.candlesticks(symbol, interval, (error, ticks, symbol) => {
+binance.candlesticks(symbol, interval, (error, ticks, selectedSymbol) => {
     if (error) {
         console.error(error);
         return;
@@ -55,8 +55,8 @@ binance.candlesticks(symbol, interval, (error, ticks, symbol) => {
     const lastSma50 = sma50[sma50.length - 1];
     const lastSma100 = sma100[sma100.length - 1];
 
-    let shouldBuy = lastPrice > lastVwap && lastRsi > 50 && lastObv > 0 && lastSma20 > lastSma50 && lastSma50 > lastSma100;
-    let shouldSell = lastPrice < lastSma20 || lastRsi < 50 || lastObv < 0 || lastPrice < lastVwap;
+    const shouldBuy = lastPrice > lastVwap && lastRsi > 50 && lastObv > 0 && lastSma20 > lastSma50 && lastSma50 > lastSma100;
+    const shouldSell = lastPrice < lastSma20 || lastRsi < 50 || lastObv < 0 || lastPrice < lastVwap;
 
     // Set stop loss and take profit levels
     const stopLossLevel = lastPrice - (lastPrice * stopLoss);

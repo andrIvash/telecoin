@@ -1,74 +1,50 @@
-<<<<<<< HEAD
-require('dotenv').config()
-const TelegramBot = require('node-telegram-bot-api');
-const service = require("./services/index");
-=======
 import * as dotenv from 'dotenv';
-import * as TelegramBot from 'node-telegram-bot-api';
-// const TelegramBot = require('node-telegram-bot-api');
+import TelegramBot from 'node-telegram-bot-api';
+import service from "./services/index.js";
+
 dotenv.config();
 const bot = new TelegramBot(process.env.TG_KEY, { polling: true });
->>>>>>> origin/main
 
-const bot = new TelegramBot(process.env.TG_KEY, {polling: true});
 let timeOutFunctionId;
 const initialKeyboard = [
-    [
-        {
-            text: 'BTC',
-            callback_data: 'btc'
-        }
-    ],
-    [
-<<<<<<< HEAD
-      {
+    [{
+        text: 'BTC',
+        callback_data: 'btc'
+    }],
+    [{
         text: 'ETH',
         callback_data: 'eth'
-      }
-    ],
-    [
-        {
-          text: 'ADA',
-          callback_data: 'ada'
-        }
-    ],
-    [
-        {
-          text: 'DOGE',
-          callback_data: 'doge'
-        }
-    ],
-    [
-        {
-          text: 'SHIB',
-          callback_data: 'shib'
-        }
-    ],
-    [
-        {
-          text: 'BUSD',
-          callback_data: 'busd'
-=======
-        {
-            text: 'ETH',
-            callback_data: 'eth'
->>>>>>> origin/main
-        }
-    ]
+    }],
+    [{
+        text: 'BUSD',
+        callback_data: 'busd'
+    }],
+    [{
+        text: 'ADA',
+        callback_data: 'ada'
+    }],
+    [{
+        text: 'DOGE',
+        callback_data: 'doge'
+    }],
+    [{
+        text: 'SHIB',
+        callback_data: 'shib'
+    }]
 ];
 const activeKeyboard = [
     [
-      {
-        text: 'Stop',
-        callback_data: 'stop'
-      }
+        {
+            text: 'Stop',
+            callback_data: 'stop'
+        }
     ]
 ];
 
 const formatResult = (data) => {
-    if (data.hasOwnProperty('close')) {
+    if (Object.prototype.hasOwnProperty.call(data, 'close')) {
         return `*${data.currency}:*\nlast close: ${data.close}`
-    } else if (data.hasOwnProperty('shouldSell')) {
+    } if (Object.prototype.hasOwnProperty.call(data, 'shouldSell')) {
         return `
             *${data.currency}:*
             price: ${data.current}
@@ -77,7 +53,7 @@ const formatResult = (data) => {
             \u{25FC}takeProfitLevel: ${data.takeProfitLevel}
             \u{25FC}reverse: *${data.reverse}*\n
         `;
-    } else if (data.hasOwnProperty('shouldBuy')) {
+    } if (Object.prototype.hasOwnProperty.call(data, 'shouldBuy')) {
         return `
             *${data.currency}:*
             price: ${data.current}
@@ -86,9 +62,9 @@ const formatResult = (data) => {
             \u{25FC}takeProfitLevel: ${data.takeProfitLevel}
             \u{25FC}reverse: *${data.reverse}*
         `;
-    } else {
-        return `*${data.currency}:*\n\u{2757}\u{2757} no data`;
-    }
+    } 
+    return `*${data.currency}:*\n\u{2757}\u{2757} no data`;
+    
 };
 
 
