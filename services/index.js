@@ -1,10 +1,19 @@
 import Binance from 'node-binance-api';
-import { SMA, RSI, VWAP, OBV }  from 'technicalindicators';
+import { SMA, RSI, VWAP, OBV, Stochastic }  from 'technicalindicators';
+import {
+    getTrendDirection,
+    detectTrendReversal,
+    detectPatterns,
+    getFormattedPrice,
+    getPricePeacks,
+    checkDivergence
+} from "../utils/index.js";
 
 // Initialize Binance API client
 const binance = new Binance().options({
     APIKEY: process.env.B_KEY,
-    APISECRET: process.env.BS_KEY
+    APISECRET: process.env.BS_KEY,
+    "family": 4,
 });
 
 const calculateSignals = (currency, timeframe, cb) => {
@@ -17,10 +26,13 @@ const calculateSignals = (currency, timeframe, cb) => {
         sma100: 100,
         rsi: 14,
         vwap: 60,
-        obv: null // this can be set dynamically based on the time interval
+        obv: null, // this can be set dynamically based on the time interval
+        stochPeriod: 14,
+        stochSignalPeriod: 3
     };
     const stopLoss = 0.01;
     const takeProfit = 0.03;
+    const stochThreshold = 80;
 
     // Fetch historical price data
     binance.candlesticks(symbol, interval, (error, ticks, selectedSymbol) => {
@@ -30,7 +42,38 @@ const calculateSignals = (currency, timeframe, cb) => {
         }
 
         // Format price data
-        const prices = ticks.map(tick => parseFloat(tick[4]));
+        const  resultPrices = ticks.map(tick => {
+            return {
+                open: parseFloat(tick[1]),
+                high: parseFloat(tick[2]),
+                low: parseFloat(tick[3]),
+                close: parseFloat(tick[4]),
+            }
+        });
+        const prices = resultPrices.map(p => p.close);
+        const highPrices = resultPrices.map(p => p.high);
+        const lowPrices = resultPrices.map(p => p.low);
+        const openPrices = resultPrices.map(p => p.open);
+        const formattedPrice = getFormattedPrice(resultPrices, 20);
+        console.info("prices", prices);
+        console.log("resultPrice1", resultPrices.slice(-2));
+        console.log("resultPrice2", getFormattedPrice(resultPrices, 2));
+        // test space
+        console.log("trend:", getTrendDirection(prices));    
+        
+        const isReversal = detectTrendReversal({
+            lowPrices,
+            highPrices,
+            prices
+        });
+        if (isReversal) {
+            console.log('Potential trend reversal detected!');
+        } else {
+            console.log('No trend reversal detected.');
+        }
+
+        console.log("pattern: ", detectPatterns(formattedPrice));
+        // =>
 
         // Calculate technical indicators
         const sma20 = SMA.calculate({ period: periods.sma20, values: prices });
@@ -45,6 +88,27 @@ const calculateSignals = (currency, timeframe, cb) => {
             close: prices
         });
         const obv = OBV.calculate({ close: prices, volume: ticks.map(tick => parseFloat(tick[7])) });
+        const stoch = Stochastic.calculate({
+            period: periods.stochPeriod,
+            low: lowPrices,
+            high: highPrices,
+            close: prices,
+            signalPeriod: periods.stochSignalPeriod
+        })
+
+        if (stoch[stoch.length - 1].k >= stochThreshold) {
+            console.log('Stoch: Sell Signal');
+        } else if (stoch[stoch.length - 1].k <= 100 - stochThreshold) {
+            console.log('Stoch: Buy Signal');
+        } else {
+            console.log('Stoch: No Signal');
+        }
+
+        // divergence
+        const peacks = getPricePeacks(prices);
+        console.log("peacks", peacks);
+        checkDivergence(prices, rsi, stoch);
+        // =>
 
         // Determine entry and exit points
         const lastPrice = prices[prices.length - 1];
@@ -96,7 +160,7 @@ const calculateSignals = (currency, timeframe, cb) => {
 	        console.log(`last close: ${close}`);
             cb({currency, close});
         }   
-    });
+    }, {limit: 100});
 };
 
 export default {
