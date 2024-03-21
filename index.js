@@ -138,7 +138,7 @@ const formatResult = (data) => {
 //         });
 //     }
 // });
-service.calculateSignals("BTCUSDT", "1w", (result) => {
+service.calculateSignals("BTCUSDT", "1d", (result) => {
     console.log("result", result);
     // console.log(formatResult(result));
 });

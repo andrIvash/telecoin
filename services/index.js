@@ -28,11 +28,14 @@ const calculateSignals = (currency, timeframe, cb) => {
         vwap: 60,
         obv: null, // this can be set dynamically based on the time interval
         stochPeriod: 14,
-        stochSignalPeriod: 3
+        stochSignalPeriod: 3,
+        atr: 14
     };
     const stopLoss = 0.01;
     const takeProfit = 0.03;
     const stochThreshold = 80;
+    const riskFactor = 1.0;
+    const rewaerdFactor = 1.5;
 
     // Fetch historical price data
     binance.candlesticks(symbol, interval, (error, ticks, selectedSymbol) => {
