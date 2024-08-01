@@ -1,4 +1,5 @@
 import { SMA, RSI, ADX, MACD, bullish, bearish }  from 'technicalindicators';
+import { calculateTechIndicatorsData } from './calculateTechIndicatorsData.js';
 /**
  * Determine the direction of trend movement using SMA crossover and RSI
  * @param {Array} prices - An array of historical prices
@@ -289,4 +290,60 @@ export const checkDivergence = (closes, rsiValues, stochasticValues) => {
             prices: ${lowPeaks[lowPeaks.length - 2].price} - ${lowPeaks[lowPeaks.length - 1].price}`);
         }
     }
+}
+
+/**
+ * Fetch historical price data
+ */
+
+export const fetchPriceData = ({
+    client,
+    symbol,
+    interval
+}) => {
+    return new Promise((res, rej) => {
+        client.candlesticks(symbol, interval, (error, ticks, selectedSymbol) => {
+            if (error) {
+                console.error("error", selectedSymbol);
+                rej(error);
+                return;
+            }
+    
+            // Format price data
+            const resultPrices = ticks.map(tick => {
+                return {
+                    open: parseFloat(tick[1]),
+                    high: parseFloat(tick[2]),
+                    low: parseFloat(tick[3]),
+                    close: parseFloat(tick[4]),
+                }
+            });
+            const closePrices = resultPrices.map(p => p.close);
+            const highPrices = resultPrices.map(p => p.high);
+            const lowPrices = resultPrices.map(p => p.low);
+            const openPrices = resultPrices.map(p => p.open);
+            const formattedPrice = getFormattedPrice(resultPrices, 20);
+            console.info("close prices", closePrices);
+            console.log("resultPrice1", resultPrices.slice(-2));
+            console.log("resultPrice2 - formted", getFormattedPrice(resultPrices, 2));
+            res({
+                rawPrices: {
+                    close: closePrices,
+                    high: highPrices,
+                    low: lowPrices,
+                    open: openPrices
+                },
+                formatedPrices: formattedPrice,
+                ticks
+            })
+        }, {limit: 100});
+    });
+}
+
+export const parseApiErrorMsg = (err) => {
+    return console.log(err.statusCode || "", err.statusMessage || 'smth went wrong');
+}
+
+export default {
+    calculateTechIndicatorsData
 }

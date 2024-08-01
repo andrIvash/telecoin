@@ -63,4 +63,3 @@ binance.candlesticks(symbol, interval, (error, ticks, selectedSymbol) => {
     const takeProfitLevel = lastPrice + (lastPrice * takeProfit);
 });
 
-
