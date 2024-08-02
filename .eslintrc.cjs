@@ -1,19 +1,15 @@
 module.exports = {
-    parser: "@babel/eslint-parser",
+    parser: '@babel/eslint-parser',
     parserOptions: {
-        requireConfigFile: false,
+        requireConfigFile: false
     },
-    extends: [
-        "handlebarlabs",
-        "prettier"
-    ],
+    extends: ['handlebarlabs', 'prettier'],
     rules: {
-        "react/jsx-props-no-spreading": 0,
-        "react/jsx-curly-newline": 0,
-        "react/style-prop-object": 0,
-        "indent": ["error", 4],
-        "import/extensions": [0, {"js": "always"  }]
-
-
-    },
-}
+        'react/jsx-props-no-spreading': 0,
+        'react/jsx-curly-newline': 0,
+        'react/style-prop-object': 0,
+        indent: ['error', 4],
+        'import/extensions': [0, { js: 'always' }],
+        'no-nested-ternary': 0
+    }
+};

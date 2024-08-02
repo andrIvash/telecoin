@@ -1,27 +1,28 @@
 import Binance from 'node-binance-api';
-import { SMA, RSI, VWAP, OBV, Stochastic }  from 'technicalindicators';
+import { SMA, RSI, VWAP, OBV, Stochastic } from 'technicalindicators';
 import utils, {
-    getTrendDirection,
     detectTrendReversal,
     detectPatterns,
     getFormattedPrice,
     getPricePeacks,
     checkDivergence,
     fetchPriceData,
-    parseApiErrorMsg,
-} from "../utils/index.js";
+    parseApiErrorMsg
+} from '../utils/index.js';
+
+import getTrendDirection from '../utils/getTrendDirection.js';
 
 // Initialize Binance API client
 const binance = new Binance().options({
     APIKEY: process.env.B_KEY,
     APISECRET: process.env.BS_KEY,
-    "family": 4,
+    family: 4
 });
 
 const calculateSignals = async (currency, timeframe, cb) => {
-    console.log(`go: ${  currency}`);
+    console.log(`go: ${currency}`);
     const symbol = currency || 'BTCUSDT'; //
-    const interval = timeframe || '15m';// '1h';
+    const interval = timeframe || '15m'; // '1h';
     const trendInterval = '1w';
     const periods = {
         sma20: 20,
@@ -42,9 +43,9 @@ const calculateSignals = async (currency, timeframe, cb) => {
         const { rawPrices } = await fetchPriceData({
             client: binance,
             symbol,
-            interval: '1w'
+            interval: trendInterval
         });
-        console.log("trend:", getTrendDirection(rawPrices.close));
+        console.log('trend:', getTrendDirection.v2(rawPrices));
         const isReversal = detectTrendReversal({
             lowPrices: rawPrices.low,
             highPrices: rawPrices.high,
@@ -55,9 +56,9 @@ const calculateSignals = async (currency, timeframe, cb) => {
         } else {
             console.log('No trend reversal detected.');
         }
-    } catch(err) {
+    } catch (err) {
         parseApiErrorMsg(err);
-    };
+    }
 
     try {
         // Fetch historical price data for signals calculation
@@ -71,25 +72,15 @@ const calculateSignals = async (currency, timeframe, cb) => {
             periods,
             rawPrices,
             ticks
-        })
+        });
         if (!indicators) {
             return;
         }
-        const {
-            sma20,
-            sma50,
-            sma100,
-            rsi,
-            vwap,
-            obv,
-            stoch
-        } = indicators;
-        
-        
-    } catch(err) {
+        const { sma20, sma50, sma100, rsi, vwap, obv, stoch } = indicators;
+    } catch (err) {
         parseApiErrorMsg(err);
-    };
-    
+    }
+
     // // Fetch historical price data
     // binance.candlesticks(symbol, interval, (error, ticks, selectedSymbol) => {
     //     if (error) {
@@ -115,8 +106,8 @@ const calculateSignals = async (currency, timeframe, cb) => {
     //     console.log("resultPrice1", resultPrices.slice(-2));
     //     console.log("resultPrice2", getFormattedPrice(resultPrices, 2));
     //     // test space
-    //     console.log("trend:", getTrendDirection(prices));    
-        
+    //     console.log("trend:", getTrendDirection(prices));
+
     //     const isReversal = detectTrendReversal({
     //         lowPrices,
     //         highPrices,
@@ -215,10 +206,10 @@ const calculateSignals = async (currency, timeframe, cb) => {
     //         const [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = lastTick;
     //         console.log(`last close: ${close}`);
     //         cb({currency, close});
-    //     }   
+    //     }
     // }, {limit: 100});
 };
 
 export default {
     calculateSignals
-}
+};
