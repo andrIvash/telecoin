@@ -5,5 +5,6 @@
   "tabWidth": 4,
   "useTabs": false,
   "trailingComma": "none",
-  "bracketSpacing": true
+  "bracketSpacing": true,
+  "indent": 4
 }
